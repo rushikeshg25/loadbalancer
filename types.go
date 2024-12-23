@@ -4,14 +4,15 @@ type BackendServer struct{
 	Host string
 	Port int
 	IsHealthy bool
-	Requests int
+	ServerRequests int
 }
 
 type Loadbalancer struct{
 	Servers []BackendServer
-	Strategy Strategy
+	Strategy StrategyType
 	Port int
 	Host string
+	TotalRequests int
 }
 
 type StrategyType string
@@ -21,6 +22,3 @@ const (
 	LEASTCONN StrategyType = "LeastConn"
 )
 
-type Strategy struct{
-	Type StrategyType
-}
