@@ -1,7 +1,11 @@
-package example
+package main
+
+import (
+	"github.com/rushikeshg25/loadbalancer"
+)
 
 func main(){
-	servers:=[]BackendServer{{
+	servers:=[]loadbalancer.BackendServer{{
 		Host: "localhost",
 		Port: 8080,
 		IsHealthy: true,
@@ -13,9 +17,9 @@ func main(){
 		IsHealthy: true,
 		ServerRequests: 0,
 	}}
-	lb:=Loadbalancer{
+	lb:=loadbalancer.Loadbalancer{
 		Servers: servers,
-		Strategy: ROUNDROBIN,
+		Strategy: loadbalancer.ROUNDROBIN,
 		Port: 9090,
 		Host: "localhost",
 		TotalRequests: 0,
