@@ -1,4 +1,4 @@
-package loadbalancer
+package example
 
 func main(){
 	servers:=[]BackendServer{{
