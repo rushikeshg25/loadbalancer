@@ -26,8 +26,9 @@ func (lb *Loadbalancer) Serve(ctx context.Context, listener net.Listener) error 
 	defer listener.Close()
 	stop := context.AfterFunc(ctx, func() { listener.Close() })
 	defer stop()
+	ctx, cancel := context.WithCancel(ctx)
 	var wg sync.WaitGroup
-	defer wg.Wait()
+	defer func() { cancel(); wg.Wait() }()
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -48,6 +49,9 @@ func (lb *Loadbalancer) InitLoadbalancer() {
 	_ = lb.Serve(context.Background(), listener)
 }
 func (lb *Loadbalancer) reserve(excluded map[int]bool) int {
+	return lb.reserveWith(lb.Strategy, excluded)
+}
+func (lb *Loadbalancer) reserveWith(strategy StrategyType, excluded map[int]bool) int {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
 	best := -1
@@ -57,10 +61,10 @@ func (lb *Loadbalancer) reserve(excluded map[int]bool) int {
 		if excluded[i] || !s.IsHealthy {
 			continue
 		}
-		if best < 0 || lb.Strategy == LEASTCONN && s.ServerRequests < lb.Servers[best].ServerRequests {
+		if best < 0 || strategy == LEASTCONN && s.ServerRequests < lb.Servers[best].ServerRequests {
 			best = i
 		}
-		if lb.Strategy != LEASTCONN {
+		if strategy != LEASTCONN {
 			break
 		}
 	}

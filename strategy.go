@@ -2,7 +2,10 @@ package loadbalancer
 
 // NextServer selects a healthy backend without reserving a live connection.
 func (lb *Loadbalancer) NextServer() BackendServer {
-	i := lb.reserve(nil)
+	return lb.selectServer(lb.Strategy)
+}
+func (lb *Loadbalancer) selectServer(strategy StrategyType) BackendServer {
+	i := lb.reserveWith(strategy, nil)
 	if i < 0 {
 		return BackendServer{}
 	}
@@ -12,5 +15,5 @@ func (lb *Loadbalancer) NextServer() BackendServer {
 	lb.release(i)
 	return s
 }
-func (lb *Loadbalancer) RoundRobin() BackendServer { return lb.NextServer() }
-func (lb *Loadbalancer) LeastConn() BackendServer  { return lb.NextServer() }
+func (lb *Loadbalancer) RoundRobin() BackendServer { return lb.selectServer(ROUNDROBIN) }
+func (lb *Loadbalancer) LeastConn() BackendServer  { return lb.selectServer(LEASTCONN) }
